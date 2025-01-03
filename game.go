@@ -10,10 +10,21 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
-	if g.isQuit() {
+	// ゲーム終了
+	if g.isQuitRequested() {
 		return ebiten.Termination
 	}
-	return g.mascot.update(g.iSKeyPressed())
+	// 主アクションを実行する
+	if g.isMainActionRequested() {
+		g.mascot.ChangePosition()
+	}
+	// スケール変えアクションを実行する
+	if g.getChangeScaleRequest() == 1 {
+		g.mascot.Bigger()
+	} else if g.getChangeScaleRequest() == -1 {
+		g.mascot.Smaller()
+	}
+	return g.mascot.update()
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -24,7 +35,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return g.mascot.mascotR.Bounds().Dx(), g.mascot.mascotR.Bounds().Dy()
 }
 
-func (g *Game) iSKeyPressed() bool {
+func (g *Game) isMainActionRequested() bool {
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		return true
 	}
@@ -34,7 +45,7 @@ func (g *Game) iSKeyPressed() bool {
 	return false
 }
 
-func (g *Game) isQuit() bool {
+func (g *Game) isQuitRequested() bool {
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) || inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		return true
 	}
@@ -42,4 +53,13 @@ func (g *Game) isQuit() bool {
 		return true
 	}
 	return false
+}
+
+func (g *Game) getChangeScaleRequest() int {
+	if inpututil.IsKeyJustPressed(ebiten.KeyB)  {
+		return 1
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		return -1
+	}
+	return 0
 }

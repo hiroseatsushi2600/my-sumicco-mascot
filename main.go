@@ -11,7 +11,7 @@ func main() {
 	res := NewResource()
 
 	ebiten.SetWindowSize(res.GetMascotR().Bounds().Dx(), res.mascotR.Bounds().Dy())
-	ebiten.SetWindowTitle("human lost mascot2")
+	ebiten.SetWindowTitle("sumicco mascot")
 	ebiten.SetWindowDecorated(false)
 	ebiten.SetRunnableOnUnfocused(true)
 	ebiten.SetWindowFloating(true)
@@ -19,6 +19,9 @@ func main() {
 
 	op := &ebiten.RunGameOptions{
 		ScreenTransparent: true,
+		// 奥ゆかしさ重点
+		InitUnfocused: true,
+		SkipTaskbar: true,
 	}
 
 	game := &Game{
