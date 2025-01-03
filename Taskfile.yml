@@ -1,0 +1,21 @@
+version: '3'
+
+tasks:
+  run:
+    aliases: [r]
+    cmds:
+      - go run .
+
+  build:
+    aliases: [b]
+    cmds:
+      - task: build.windows
+      - task: build.mac
+  build.windows:
+    cmd: GOOS=windows GOARCH=amd64 go build -o mascot.exe
+  build.mac:
+    cmd: CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o mascot-mac
+
+  tidy:
+    cmds:
+      - go mod tidy
