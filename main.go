@@ -17,7 +17,7 @@ func main() {
 	ebiten.SetWindowDecorated(false)
 	ebiten.SetRunnableOnUnfocused(true)
 	ebiten.SetWindowFloating(true)
-	ebiten.SetTPS(6)
+	ebiten.SetTPS(8)
 	ebiten.SetScreenClearedEveryFrame(false)
 	if len(os.Args) > 1 {
         switch os.Args[1] {
