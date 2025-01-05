@@ -4,18 +4,16 @@ tasks:
   run:
     aliases: [r]
     cmds:
-      - go run .
-
+      - go run . -d
   build:
     aliases: [b]
     cmds:
       - task: build.windows
-      - task: build.mac
+      - task: build.macapp
   build.windows:
-    cmd: GOOS=windows GOARCH=amd64 go build -o mascot.exe
-  build.mac:
-    cmd: CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o mascot-mac
-
+    cmd: GOOS=windows GOARCH=amd64 go build -ldflags -H=windowsgui -o sumicco.exe
+  build.macapp:
+    cmd: CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o Sumicco.app/Contents/MacOS/sumicco
   tidy:
     cmds:
       - go mod tidy

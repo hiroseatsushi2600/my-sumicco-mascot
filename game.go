@@ -1,12 +1,17 @@
 package main
 
 import (
+	"fmt"
+	"log/slog"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type Game struct {
 	mascot *Mascot
+	skipDraw bool
+	introShown bool
 }
 
 func (g *Game) Update() error {
@@ -14,21 +19,30 @@ func (g *Game) Update() error {
 	if g.isQuitRequested() {
 		return ebiten.Termination
 	}
-	// 主アクションを実行する
 	if g.isMainActionRequested() {
 		g.mascot.ChangePosition()
-	}
-	// スケール変えアクションを実行する
-	if g.getChangeScaleRequest() == 1 {
+		g.skipDraw = false
+	} else if g.getChangeScaleRequest() == 1 {
 		g.mascot.Bigger()
+		g.skipDraw = false
 	} else if g.getChangeScaleRequest() == -1 {
 		g.mascot.Smaller()
+		g.skipDraw = false
+	} else {
+		g.skipDraw = true
 	}
 	return g.mascot.update()
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	if g.skipDraw && g.introShown {
+		return
+	}
+	slog.Debug("draw", "skipDraw", fmt.Sprint(g.skipDraw))
+	// ebiten.SetScreenClearedEveryFrame(false) であるためここで明示的にクリアする
+	screen.Clear()
 	g.mascot.draw(screen)
+	g.introShown = true
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

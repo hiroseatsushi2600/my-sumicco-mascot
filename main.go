@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
-	
+	"log/slog"
+	"os"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -16,6 +18,15 @@ func main() {
 	ebiten.SetRunnableOnUnfocused(true)
 	ebiten.SetWindowFloating(true)
 	ebiten.SetTPS(6)
+	ebiten.SetScreenClearedEveryFrame(false)
+	if len(os.Args) > 1 {
+        switch os.Args[1] {
+        case "-d":
+            slog.SetLogLoggerLevel(slog.LevelDebug)
+        }
+    }
+	slog.Info("start", "args", os.Args)
+	slog.Debug("debug")
 
 	op := &ebiten.RunGameOptions{
 		ScreenTransparent: true,
@@ -27,6 +38,7 @@ func main() {
 	game := &Game{
 		mascot: NewMascot(res.GetMascotR(), res.GetMascotL()),
 	}
+	game.skipDraw = false
 
 	if err := ebiten.RunGameWithOptions(game, op); err != nil {
 		log.Fatal(err)
