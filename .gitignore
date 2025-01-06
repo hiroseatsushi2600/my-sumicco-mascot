@@ -1,2 +1,5 @@
-sumicco.exe
 Sumicco.app/Contents/MacOS/sumicco
+build
+
+＃asdf
+.tool-versions

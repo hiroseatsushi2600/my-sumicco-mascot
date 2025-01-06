@@ -35,12 +35,10 @@ func main() {
 		SkipTaskbar: true,
 	}
 
-	game := &Game{
-		mascot: NewMascot(res.GetMascotR(), res.GetMascotL()),
-	}
-	game.skipDraw = false
+    input := NewInput()
+    game := NewGame(NewMascot(input, res.GetMascotR(), res.GetMascotL()), input)
 
-	if err := ebiten.RunGameWithOptions(game, op); err != nil {
+    if err := ebiten.RunGameWithOptions(game, op); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -7,33 +7,36 @@ import (
 	"log/slog"
 )
 
-type MascotPosition int
-
-const (
-	TopLeft MascotPosition = iota
-	TopRight
-	BottomLeft
-	BottomRight
-)
-
 type Mascot struct {
+	input          *Input
+	monitor        *Monitor
 	mascotR        *ebiten.Image
 	mascotL        *ebiten.Image
 	characterScale float64
-	position       MascotPosition
 	winPosX        int
 	winPosY        int
+	winPosLR       LR
 }
 
-func NewMascot(mascotR *ebiten.Image, mascotL *ebiten.Image) *Mascot {
+type LR int
 
+const (
+	L LR = iota
+	R
+)
+
+const movePower = 16
+
+func NewMascot(input *Input, mascotR *ebiten.Image, mascotL *ebiten.Image) *Mascot {
 	return &Mascot{
+		input:          input,
+		monitor:        NewMonitor(),
 		mascotR:        mascotR,
 		mascotL:        mascotL,
 		characterScale: 0.25,
-		position:       BottomLeft,
 		winPosX:        0,
 		winPosY:        0,
+		winPosLR:       L,
 	}
 }
 
@@ -43,19 +46,42 @@ func (m *Mascot) update() error {
 	monitorWidth, monitorHeight := ebiten.Monitor().Size()
 	slog.Debug("mascot w, h, monitor w, h", "mas w", fmt.Sprint(mascotWidth), "mas h", fmt.Sprint(mascotHeight), "mon w", fmt.Sprint(monitorWidth), "mon h", fmt.Sprint(monitorHeight))
 
-	switch m.position {
-	case TopLeft:
-		m.winPosX = 0
-		m.winPosY = 0
-	case TopRight:
-		m.winPosX = monitorWidth - mascotWidth
-		m.winPosY = 0
-	case BottomLeft:
-		m.winPosX = 0
-		m.winPosY = monitorHeight - mascotHeight
-	case BottomRight:
-		m.winPosX = monitorWidth - mascotWidth
-		m.winPosY = monitorHeight - mascotHeight
+	if m.input.GetRequest() == MoveUp && m.winPosY > 0 {
+		m.winPosY -= movePower
+	}
+	if m.input.GetRequest() == MoveDown && m.winPosY < monitorHeight-mascotHeight {
+		m.winPosY += movePower
+	}
+	if m.input.GetRequest() == MoveLeft {
+		if m.winPosLR == R {
+			m.winPosLR = L
+			m.winPosX = 0
+		} else {
+			m.monitor.PreviousMonitor()
+		}
+	}
+	if m.input.GetRequest() == MoveRight {
+		if m.winPosLR == L {
+			m.winPosLR = R
+			m.winPosX = monitorWidth - mascotWidth
+		} else {
+			m.monitor.NextMonitor()
+		}
+	}
+	if m.input.GetRequest() == Avoid {
+		if m.winPosLR == R {
+			m.winPosLR = L
+			m.winPosX = 0
+		} else {
+			m.winPosLR = R
+			m.winPosX = monitorWidth - mascotWidth			
+		}
+	}
+	if m.input.GetRequest() == ScaleUp {
+		m.characterScale += 0.05
+	}
+	if m.input.GetRequest() == ScaleDown {
+		m.characterScale -= 0.05
 	}
 
 	ebiten.SetWindowPosition(m.winPosX, m.winPosY)
@@ -64,38 +90,27 @@ func (m *Mascot) update() error {
 
 func (m *Mascot) draw(screen *ebiten.Image) {
 	var img *ebiten.Image
-	switch m.position {
-	case TopLeft, BottomLeft:
+	if m.winPosLR == L {
 		img = m.mascotL
-	case TopRight, BottomRight:
+	} else {
 		img = m.mascotR
 	}
+
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(m.characterScale, m.characterScale)
-	x, y := getZure(m.position, img.Bounds().Dx(), img.Bounds().Dy(), m.characterScale)
+	x, y := calcMerikomi(m.winPosLR, img.Bounds().Dx(), img.Bounds().Dy(), m.characterScale)
 	op.GeoM.Translate(x, y)
 	screen.DrawImage(img, op)
 }
 
-func (m *Mascot) ChangePosition() {
-	m.position = (m.position + 1) % 4
-}
-
-func (m *Mascot) Bigger() {
-	m.characterScale += 0.05
-}
-
-func (m *Mascot) Smaller() {
-	m.characterScale -= 0.05
-}
-
-func getZure(pos MascotPosition, x int, y int, scale float64) (float64, float64) {
+func calcMerikomi(winPosLR LR, x int, y int, scale float64) (float64, float64) {
+	// マスコットが体半分ほどを画面端に隠す座標を計算する
 	hr := 0.4 * scale
-	switch pos {
-	case TopLeft, BottomLeft:
-		return -float64(x) * hr, 0
-	case TopRight, BottomRight:
-		return float64(x) * hr, 0
+	switch winPosLR {
+	case L:
+		return -float64(x) * hr, float64(y) * hr
+	case R:
+		return float64(x) * hr, float64(y) * hr
 	}
 	return 0, 0
 }

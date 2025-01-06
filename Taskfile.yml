@@ -8,10 +8,13 @@ tasks:
   build:
     aliases: [b]
     cmds:
-      - task: build.windows
-      - task: build.macapp
+      - echo "build {{OS}}"
+      - cmd: task build.windows
+        platforms: [windows]
+      - cmd: task build.macapp
+        platforms: [darwin]
   build.windows:
-    cmd: GOOS=windows GOARCH=amd64 go build -ldflags -H=windowsgui -o sumicco.exe
+    cmd: GOOS=windows GOARCH=amd64 go build -ldflags -H=windowsgui -o build/sumicco.exe
   build.macapp:
     cmd: CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -o Sumicco.app/Contents/MacOS/sumicco
   tidy:
