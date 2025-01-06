@@ -44,8 +44,11 @@ func (m *Mascot) update() error {
 	mascotWidth := int(float64(m.mascotR.Bounds().Dx()) * m.characterScale)
 	mascotHeight := int(float64(m.mascotR.Bounds().Dy()) * m.characterScale)
 	monitorWidth, monitorHeight := ebiten.Monitor().Size()
-	slog.Debug("mascot w, h, monitor w, h", "mas w", fmt.Sprint(mascotWidth), "mas h", fmt.Sprint(mascotHeight), "mon w", fmt.Sprint(monitorWidth), "mon h", fmt.Sprint(monitorHeight))
+	// slog.Debug("mascot w, h, monitor w, h", "mas w", fmt.Sprint(mascotWidth), "mas h", fmt.Sprint(mascotHeight), "mon w", fmt.Sprint(monitorWidth), "mon h", fmt.Sprint(monitorHeight))
 
+	if m.input.GetRequest() != None {
+		slog.Debug("input request", "req", fmt.Sprint(m.input.GetRequest()))
+	}
 	if m.input.GetRequest() == MoveUp && m.winPosY > 0 {
 		m.winPosY -= movePower
 	}
@@ -55,7 +58,6 @@ func (m *Mascot) update() error {
 	if m.input.GetRequest() == MoveLeft {
 		if m.winPosLR == R {
 			m.winPosLR = L
-			m.winPosX = 0
 		} else {
 			m.monitor.PreviousMonitor()
 		}
@@ -63,7 +65,6 @@ func (m *Mascot) update() error {
 	if m.input.GetRequest() == MoveRight {
 		if m.winPosLR == L {
 			m.winPosLR = R
-			m.winPosX = monitorWidth - mascotWidth
 		} else {
 			m.monitor.NextMonitor()
 		}
@@ -71,10 +72,8 @@ func (m *Mascot) update() error {
 	if m.input.GetRequest() == Avoid {
 		if m.winPosLR == R {
 			m.winPosLR = L
-			m.winPosX = 0
 		} else {
 			m.winPosLR = R
-			m.winPosX = monitorWidth - mascotWidth			
 		}
 	}
 	if m.input.GetRequest() == ScaleUp {
@@ -82,6 +81,13 @@ func (m *Mascot) update() error {
 	}
 	if m.input.GetRequest() == ScaleDown {
 		m.characterScale -= 0.05
+	}
+
+	// x座標は原則LRによって決まる
+	if m.winPosLR == L {
+		m.winPosX = 0
+	} else {
+		m.winPosX = monitorWidth - mascotWidth
 	}
 
 	ebiten.SetWindowPosition(m.winPosX, m.winPosY)
