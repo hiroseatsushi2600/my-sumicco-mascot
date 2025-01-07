@@ -23,16 +23,11 @@ func (m *Monitor) NextMonitor() {
         return
     }
     // モニターの切り替え
-    currentIndex := -1
-    for i, monitor := range m.monitors {
+	for i, monitor := range m.monitors {
         if monitor == m.currentMonitor {
-            currentIndex = i
+            m.currentMonitor = m.monitors[(i+1)%len(m.monitors)]
             break
         }
-    }
-    if currentIndex != -1 {
-        m.currentMonitor = m.monitors[(currentIndex+1)%len(m.monitors)]
-        ebiten.SetMonitor(m.currentMonitor)
     }
 }
 
@@ -41,15 +36,10 @@ func (m *Monitor) PreviousMonitor() {
         return
     }
     // モニターの切り替え
-    currentIndex := -1
-    for i, monitor := range m.monitors {
+    for  i, monitor := range m.monitors {
         if monitor == m.currentMonitor {
-            currentIndex = i
+            m.currentMonitor = m.monitors[(i-1+len(m.monitors))%len(m.monitors)]
             break
         }
-    }
-    if currentIndex != -1 {
-        m.currentMonitor = m.monitors[(currentIndex-1+len(m.monitors))%len(m.monitors)]
-        ebiten.SetMonitor(m.currentMonitor)
     }
 }

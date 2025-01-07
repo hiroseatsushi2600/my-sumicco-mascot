@@ -44,7 +44,6 @@ func (m *Mascot) update() error {
 	mascotWidth := int(float64(m.mascotR.Bounds().Dx()) * m.characterScale)
 	mascotHeight := int(float64(m.mascotR.Bounds().Dy()) * m.characterScale)
 	monitorWidth, monitorHeight := ebiten.Monitor().Size()
-	// slog.Debug("mascot w, h, monitor w, h", "mas w", fmt.Sprint(mascotWidth), "mas h", fmt.Sprint(mascotHeight), "mon w", fmt.Sprint(monitorWidth), "mon h", fmt.Sprint(monitorHeight))
 
 	if m.input.GetRequest() != None {
 		slog.Debug("input request", "req", fmt.Sprint(m.input.GetRequest()))
@@ -77,10 +76,14 @@ func (m *Mascot) update() error {
 		}
 	}
 	if m.input.GetRequest() == ScaleUp {
-		m.characterScale += 0.05
+		if m.characterScale < 1.35 {
+			m.characterScale += 0.05
+		}
 	}
 	if m.input.GetRequest() == ScaleDown {
-		m.characterScale -= 0.05
+		if m.characterScale > 0.1 {
+			m.characterScale -= 0.05
+		}
 	}
 
 	// x座標は原則LRによって決まる
@@ -90,7 +93,9 @@ func (m *Mascot) update() error {
 		m.winPosX = monitorWidth - mascotWidth
 	}
 
+	slog.Debug("size", "m.characterScale", fmt.Sprint(m.characterScale))
 	ebiten.SetWindowPosition(m.winPosX, m.winPosY)
+	ebiten.SetMonitor(m.monitor.currentMonitor)
 	return nil
 }
 
@@ -104,19 +109,19 @@ func (m *Mascot) draw(screen *ebiten.Image) {
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(m.characterScale, m.characterScale)
-	x, y := calcMerikomi(m.winPosLR, img.Bounds().Dx(), img.Bounds().Dy(), m.characterScale)
+	x, y := calcMerikomi(m.winPosLR, img.Bounds().Dx(), m.characterScale)
 	op.GeoM.Translate(x, y)
 	screen.DrawImage(img, op)
 }
 
-func calcMerikomi(winPosLR LR, x int, y int, scale float64) (float64, float64) {
+func calcMerikomi(winPosLR LR, x int, scale float64) (float64, float64) {
 	// マスコットが体半分ほどを画面端に隠す座標を計算する
 	hr := 0.4 * scale
 	switch winPosLR {
 	case L:
-		return -float64(x) * hr, float64(y) * hr
+		return -float64(x) * hr, 0
 	case R:
-		return float64(x) * hr, float64(y) * hr
+		return float64(x) * hr, 0
 	}
 	return 0, 0
 }

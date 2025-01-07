@@ -25,8 +25,6 @@ func main() {
             slog.SetLogLoggerLevel(slog.LevelDebug)
         }
     }
-	slog.Info("start", "args", os.Args)
-	slog.Debug("debug")
 
 	op := &ebiten.RunGameOptions{
 		ScreenTransparent: true,

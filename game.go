@@ -44,5 +44,5 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return g.mascot.mascotR.Bounds().Dx(), g.mascot.mascotR.Bounds().Dy()
+	return outsideWidth, outsideHeight
 }
