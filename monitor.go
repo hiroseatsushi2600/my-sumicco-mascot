@@ -43,3 +43,7 @@ func (m *Monitor) PreviousMonitor() {
         }
     }
 }
+
+func (m *Monitor) CurrentMonitorSize() (int, int) {
+    return m.currentMonitor.Size()
+}

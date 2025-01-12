@@ -13,6 +13,8 @@ type Mascot struct {
 	mascotR        *ebiten.Image
 	mascotL        *ebiten.Image
 	characterScale float64
+	characterMaxScale float64
+	characterMinScale float64
 	winPosX        int
 	winPosY        int
 	winPosLR       LR
@@ -33,7 +35,9 @@ func NewMascot(input *Input, mascotR *ebiten.Image, mascotL *ebiten.Image) *Masc
 		monitor:        NewMonitor(),
 		mascotR:        mascotR,
 		mascotL:        mascotL,
-		characterScale: 0.25,
+		characterScale: 1,
+		characterMaxScale: 1,
+		characterMinScale: 0.1,
 		winPosX:        0,
 		winPosY:        0,
 		winPosLR:       L,
@@ -43,7 +47,7 @@ func NewMascot(input *Input, mascotR *ebiten.Image, mascotL *ebiten.Image) *Masc
 func (m *Mascot) update() error {
 	mascotWidth := int(float64(m.mascotR.Bounds().Dx()) * m.characterScale)
 	mascotHeight := int(float64(m.mascotR.Bounds().Dy()) * m.characterScale)
-	monitorWidth, monitorHeight := ebiten.Monitor().Size()
+	monitorWidth, monitorHeight := m.monitor.CurrentMonitorSize()
 
 	if m.input.GetRequest() != None {
 		slog.Debug("input request", "req", fmt.Sprint(m.input.GetRequest()))
@@ -59,6 +63,7 @@ func (m *Mascot) update() error {
 			m.winPosLR = L
 		} else {
 			m.monitor.PreviousMonitor()
+			monitorWidth, _ = m.monitor.CurrentMonitorSize()
 		}
 	}
 	if m.input.GetRequest() == MoveRight {
@@ -66,6 +71,7 @@ func (m *Mascot) update() error {
 			m.winPosLR = R
 		} else {
 			m.monitor.NextMonitor()
+			monitorWidth, _ = m.monitor.CurrentMonitorSize()
 		}
 	}
 	if m.input.GetRequest() == Avoid {
@@ -76,14 +82,16 @@ func (m *Mascot) update() error {
 		}
 	}
 	if m.input.GetRequest() == ScaleUp {
-		if m.characterScale < 1.35 {
+		if m.characterScale < m.characterMaxScale {
 			m.characterScale += 0.05
 		}
+		ebiten.SetWindowSize(mascotWidth+30, mascotHeight+30)
 	}
 	if m.input.GetRequest() == ScaleDown {
-		if m.characterScale > 0.1 {
+		if m.characterScale > m.characterMinScale {
 			m.characterScale -= 0.05
 		}
+		ebiten.SetWindowSize(mascotWidth+30, mascotHeight+30)
 	}
 
 	// x座標は原則LRによって決まる

@@ -9,9 +9,7 @@ import (
 )
 
 func main() {
-
 	res := NewResource()
-
 	ebiten.SetWindowSize(res.GetMascotR().Bounds().Dx(), res.mascotR.Bounds().Dy())
 	ebiten.SetWindowTitle("sumicco mascot")
 	ebiten.SetWindowDecorated(false)
