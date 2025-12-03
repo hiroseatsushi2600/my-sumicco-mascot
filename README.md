@@ -1,1 +1,1 @@
-It won't help you.3
+It won't help you.
