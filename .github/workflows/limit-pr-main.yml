@@ -1,0 +1,24 @@
+name: limit-main-pr
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch
+        run: |
+          SRC="${{ github.head_ref }}"
+
+          # 許可条件
+          if [[ "$SRC" == "staging" || "$SRC" =~ ^bugfix/ ]]; then
+            echo "Allowed: $SRC"
+            exit 0
+          fi
+
+          echo "❌ PR from '$SRC' is not allowed to main."
+          echo "Allowed branches: staging, bugfix/*"
+          exit 1
