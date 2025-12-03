@@ -8,6 +8,9 @@ on:
 jobs:
   check-branch:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: Validate source branch
         id: validate
