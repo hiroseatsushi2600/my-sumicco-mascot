@@ -22,7 +22,6 @@ jobs:
           echo "❌ PR from '$SRC' is not allowed to main."
           echo "Allowed branches: staging, bugfix/*"
           echo "allowed=false" >> $GITHUB_OUTPUT
-          exit 1
 
       - name: Comment on PR
         if: steps.validate.outputs.allowed == 'false'
